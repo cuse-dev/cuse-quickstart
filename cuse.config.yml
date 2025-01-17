@@ -1,0 +1,6 @@
+version: 1.0.0
+project:
+  name: quickstart
+computers:
+  - identifier: quickstart-computer
+    os: linux
