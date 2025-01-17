@@ -25,7 +25,7 @@ const AIMessage: React.FC<AIMessageProps> = ({
           {content}
         </ReactMarkdown>
       </div>
-      <div className="flex flex-col w-fit mt-4">
+      <div className="flex flex-col w-fit mt-2">
         {toolInvocations
           ?.filter((toolInvocation) => toolInvocation.state == 'result')
           .map((toolInvocation) => (
