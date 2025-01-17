@@ -4,7 +4,7 @@ export default function Preview() {
     <div className="h-full flex flex-col items-center justify-center">
       <iframe
         src={url}
-        className="scale-50 xl:scale-75 min-w-[1024px] overflow-hidden rounded-xl border-2"
+        className="scale-50 xl:scale-75 min-w-[1024px] overflow-hidden border"
         style={{
           aspectRatio: 4 / 3,
         }}

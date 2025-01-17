@@ -28,7 +28,7 @@ export default function Chat() {
 
   return (
     <div className=" w-full h-full p-2">
-      <div className="flex flex-col bg-slate-300/10 rounded-xl p-2 h-full w-full">
+      <div className="flex flex-col bg-slate-300/10 p-2 h-full w-full">
         <div ref={chatContainerRef} className="flex-1 mb-4 overflow-y-auto">
           {messages.map((message) =>
             message.role === 'user' ? (
@@ -44,7 +44,7 @@ export default function Chat() {
             )
           )}
         </div>
-        <form onSubmit={handleSubmit} className="relative border rounded-lg">
+        <form onSubmit={handleSubmit} className="relative border">
           <Textarea
             value={input}
             onChange={handleInputChange}

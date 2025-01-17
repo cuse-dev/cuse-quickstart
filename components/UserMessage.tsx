@@ -17,7 +17,7 @@ const UserMessage: React.FC<UserMessageProps> = ({ content, file }) => {
             {content}
           </ReactMarkdown>
           {file && (
-            <div className="mt-2 p-2 rounded-md flex items-center">
+            <div className="mt-2 p-2 flex items-center">
               <Paperclip className="w-4 h-4 mr-2" />
               <span className="text-sm">{file}</span>
             </div>

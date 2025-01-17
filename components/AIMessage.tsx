@@ -20,7 +20,7 @@ const AIMessage: React.FC<AIMessageProps> = ({
 }) => {
   return (
     <div className="mb-4">
-      <div className="rounded-lg max-w-[80%]">
+      <div className="max-w-[80%]">
         <ReactMarkdown className="prose dark:prose-invert max-w-none text-sm text-foreground">
           {content}
         </ReactMarkdown>
