@@ -4,6 +4,7 @@ import { Copy, RotateCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import type { ToolInvocation } from 'ai';
 import ToolMessage from './ToolMessage';
+import RequestCredentials from './RequestCredentials';
 
 interface AIMessageProps {
   content: string;
@@ -29,9 +30,15 @@ const AIMessage: React.FC<AIMessageProps> = ({
         {toolInvocations
           ?.filter((toolInvocation) => toolInvocation.state == 'result')
           .map((toolInvocation) => (
-            <ToolMessage
-              key={toolInvocation.toolCallId}
-              content={
+            toolInvocation.result.type == 'request-keychain-credentials' ?
+              <RequestCredentials
+                key={toolInvocation.toolCallId}
+                serviceId={toolInvocation.result.serviceId}
+                actions={toolInvocation.result.actions}
+              /> :
+              <ToolMessage
+                key={toolInvocation.toolCallId}
+                content={
                 typeof toolInvocation.result == 'string'
                   ? toolInvocation.result
                   : 'Took screenshot'

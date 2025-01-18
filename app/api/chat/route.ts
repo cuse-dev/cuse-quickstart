@@ -1,6 +1,7 @@
-import { streamText } from "ai";
+import { streamText, tool } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { Computer, toolsets } from "@cusedev/core";
+import { Computer, Keychain, toolsets } from "@cusedev/core";
+import { z } from "zod";
 
 export const runtime = "edge";
 
@@ -36,6 +37,8 @@ export async function POST(req: Request) {
   * Use keyboard shortcuts to help you navigate e.g. space to scroll down, shift+space to scroll up, etc.
   </IMPORTANT>`;
 
+	const keychain = new Keychain();
+
 	const computer = new Computer({
 		config: {
 			baseUrl: "http://localhost:4242/quickstart-computer/api",
@@ -45,6 +48,9 @@ export async function POST(req: Request) {
 				height: 768,
 			},
 		},
+		apps: {
+			keychain,
+		}
 	});
 
 	const result = streamText({
@@ -56,7 +62,44 @@ export async function POST(req: Request) {
 			},
 			...messages,
 		],
-		tools: toolsets.aiSdk.anthropic(computer),
+		tools: {
+			...toolsets.aiSdk.anthropic(computer),
+			wait: tool({
+				description: "Wait for a given number of seconds.",
+				parameters: z.object({
+					seconds: z.number().default(1).describe("The number of seconds to wait. If not necessary, stick to the default."),
+				}),
+				execute: async ({ seconds }) => {
+					await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+					return "Waited " + seconds + " seconds";
+				},
+			}),
+			keychain: {
+				description: 'Fill in authentication credentials for a service. Describe the steps needed to perform the authentication.',
+				parameters: z.object({
+					serviceId: z.union([z.enum(keychain.services as [string, ...string[]]), z.string()]).describe('The service to fill in credentials for. Can be novel or existing.'),
+					actions: z.array(z.object({
+						type: z.enum(['password', 'email', 'username']),
+						coordinates: z.object({
+							x: z.number(),
+							y: z.number(),
+						}),
+					})),
+				}),
+				execute: async ({ serviceId, actions }) => {
+					if (!(serviceId in keychain.services)) {
+						return {
+							type: 'request-keychain-credentials',
+							serviceId,
+							actions,
+							message: 'The user is prompted to fill in the credentials for the service. Wait for them to fill in the credentials and confirm.'
+						};
+					}
+					await keychain.authenticate(serviceId, actions);
+					return 'Form filled in successfully.';
+				},
+			},
+		},
 		maxSteps: 99,
 	});
 

@@ -11,8 +11,9 @@
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^1.1.0",
-		"@cusedev/core": "latest",
+		"@cusedev/core": "link:@cusedev/core",
 		"@radix-ui/react-dropdown-menu": "^2.1.4",
+		"@radix-ui/react-label": "^2.1.1",
 		"@radix-ui/react-slot": "^1.1.1",
 		"ai": "^4.1.0",
 		"class-variance-authority": "^0.7.1",
@@ -24,7 +25,8 @@
 		"react-dom": "^19.0.0",
 		"react-markdown": "^9.0.3",
 		"tailwind-merge": "^2.6.0",
-		"tailwindcss-animate": "^1.0.7"
+		"tailwindcss-animate": "^1.0.7",
+		"zod": "^3.24.1"
 	},
 	"devDependencies": {
 		"typescript": "^5.7.3",
