@@ -1,6 +1,6 @@
 import { streamText, tool } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { Computer, Keychain, toolsets } from "@cusedev/core";
+import { Computer, toolsets } from "@cusedev/core";
 import { z } from "zod";
 
 export const runtime = "edge";
@@ -37,21 +37,18 @@ export async function POST(req: Request) {
   * Use keyboard shortcuts to help you navigate e.g. space to scroll down, shift+space to scroll up, etc.
   </IMPORTANT>`;
 
-	const keychain = new Keychain();
-
 	const computer = new Computer({
 		config: {
-			baseUrl: "http://localhost:4242/quickstart-computer/api",
+			baseUrl: "http://localhost:4242/quickstart-computer",
 			display: {
 				number: 1,
 				width: 1024,
 				height: 768,
 			},
 		},
-		apps: {
-			keychain,
-		}
 	});
+
+	const keychainServices = await computer.system.keychain.listServices();
 
 	const result = streamText({
 		model: anthropic("claude-3-5-sonnet-latest"),
@@ -77,25 +74,26 @@ export async function POST(req: Request) {
 			keychain: {
 				description: 'Fill in authentication credentials for a service. Describe the steps needed to perform the authentication.',
 				parameters: z.object({
-					serviceId: z.union([z.enum(keychain.services as [string, ...string[]]), z.string()]).describe('The service to fill in credentials for. Can be novel or existing.'),
+					service: z.union([z.enum(keychainServices as [string, ...string[]]), z.string()]).describe('The service to fill in credentials for. Can be novel or existing.'),
 					actions: z.array(z.object({
-						type: z.enum(['password', 'email', 'username']),
+						type: z.enum(['password', 'email', 'username', 'otp', 'token' ,'phone']),
 						coordinates: z.object({
 							x: z.number(),
 							y: z.number(),
 						}),
 					})),
 				}),
-				execute: async ({ serviceId, actions }) => {
-					if (!(serviceId in keychain.services)) {
+				execute: async ({ service, actions }) => {
+					console.log(service, actions, keychainServices);
+					if (!keychainServices.includes(service)) {
 						return {
 							type: 'request-keychain-credentials',
-							serviceId,
+							service,
 							actions,
 							message: 'The user is prompted to fill in the credentials for the service. Wait for them to fill in the credentials and confirm.'
 						};
 					}
-					await keychain.authenticate(serviceId, actions);
+					await computer.system.keychain.authenticate({ service, authElements: actions });
 					return 'Form filled in successfully.';
 				},
 			},

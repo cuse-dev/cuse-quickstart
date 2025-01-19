@@ -1,22 +1,33 @@
 import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { FillAction } from '@cusedev/core';
+import { AuthElement, Computer } from '@cusedev/core';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 
 interface RequestCredentialsProps {
-  serviceId: string;
-  actions: FillAction[];
+  service: string;
+  actions: AuthElement[];
 }
 
-const RequestCredentials: React.FC<RequestCredentialsProps> = ({ serviceId, actions }) => {
+const RequestCredentials: React.FC<RequestCredentialsProps> = ({ service, actions }) => {
+	const computer = new Computer({
+		config: {
+			baseUrl: "http://localhost:4242/quickstart-computer",
+			display: {
+				number: 1,
+				width: 1024,
+				height: 768,
+			},
+		},
+	});
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
         console.log(formData.entries());
-        const credentials = Object.fromEntries(formData.entries());
-        console.log('Successfully set credentials for service', serviceId, credentials);
+        const item = Object.fromEntries(formData.entries());
+        console.log('Successfully set credentials for service', service, item);
+        computer.system.keychain.setItem({ service, item });
     }
     return (
         <form className="mb-4" onSubmit={onSubmit}>

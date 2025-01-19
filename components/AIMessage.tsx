@@ -33,7 +33,7 @@ const AIMessage: React.FC<AIMessageProps> = ({
             toolInvocation.result.type == 'request-keychain-credentials' ?
               <RequestCredentials
                 key={toolInvocation.toolCallId}
-                serviceId={toolInvocation.result.serviceId}
+                service={toolInvocation.result.service}
                 actions={toolInvocation.result.actions}
               /> :
               <ToolMessage
