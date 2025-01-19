@@ -84,7 +84,6 @@ export async function POST(req: Request) {
 					})),
 				}),
 				execute: async ({ service, actions }) => {
-					console.log(service, actions, keychainServices);
 					if (!keychainServices.includes(service)) {
 						return {
 							type: 'request-keychain-credentials',
@@ -94,7 +93,7 @@ export async function POST(req: Request) {
 						};
 					}
 					await computer.system.keychain.authenticate({ service, authElements: actions });
-					return 'Form filled in successfully.';
+					return 'Filled input field';
 				},
 			},
 		},
