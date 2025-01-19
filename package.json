@@ -11,7 +11,7 @@
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^1.1.0",
-		"@cusedev/core": "link:@cusedev/core",
+		"@cusedev/core": "latest",
 		"@radix-ui/react-dropdown-menu": "^2.1.4",
 		"@radix-ui/react-label": "^2.1.1",
 		"@radix-ui/react-slot": "^1.1.1",
@@ -35,7 +35,6 @@
 		"@types/react-dom": "^19.0.3",
 		"postcss": "^8.5.1",
 		"tailwindcss": "^3.4.17",
-		"eslint": "^9.18.0",
-		"@cusedev/cli": "link:@cusedev/cli"
+		"eslint": "^9.18.0"
 	}
 }
