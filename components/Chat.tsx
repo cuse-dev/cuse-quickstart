@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react';
 import { useChat } from 'ai/react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send } from 'lucide-react';
+import { Send, Square } from 'lucide-react';
 import UserMessage from './UserMessage';
 import AIMessage from './AIMessage';
 
@@ -16,6 +16,7 @@ export default function Chat() {
     handleSubmit,
     isLoading,
     reload,
+    stop
   } = useChat();
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -57,14 +58,24 @@ export default function Chat() {
               }
             }}
           />
-          <Button
-            type="submit"
-            size="icon"
-            className="absolute right-2 bottom-2"
-            disabled={isLoading}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+          <div className="absolute bottom-2 right-2 flex justify-end gap-2">
+            <Button
+              type="button"
+              size="icon"
+              variant="secondary"
+              onClick={stop}
+              disabled={!isLoading}
+            >
+              <Square className="h-4 w-4" />
+            </Button>
+            <Button
+              type="submit"
+              size="icon"
+              disabled={isLoading}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </form>
       </div>
     </div>
