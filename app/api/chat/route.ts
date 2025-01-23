@@ -1,6 +1,6 @@
 import { streamText, tool } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { Computer, toolsets } from "@cusedev/core";
+import { Computer, toolsets, Apps, type AuthElement } from "@cusedev/core";
 import { z } from "zod";
 
 export const runtime = "edge";
@@ -46,6 +46,9 @@ export async function POST(req: Request) {
 				height: 768,
 			},
 		},
+		apps: {
+			keychain: new Apps.Keychain(),
+		},
 	});
 
 	const keychainServices = await computer.system.keychain.listServices();
@@ -64,38 +67,62 @@ export async function POST(req: Request) {
 			wait: tool({
 				description: "Wait for a given number of seconds.",
 				parameters: z.object({
-					seconds: z.number().default(1).describe("The number of seconds to wait. If not necessary, stick to the default."),
+					seconds: z
+						.number()
+						.default(1)
+						.describe(
+							"The number of seconds to wait. If not necessary, stick to the default."
+						),
 				}),
 				execute: async ({ seconds }) => {
 					await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 					return "Waited " + seconds + " seconds";
 				},
 			}),
-			keychain: {
-				description: 'Fill in authentication credentials for a service. Describe the steps needed to perform the authentication.',
+			keychain: tool({
+				description:
+					"Request the user to fill in a login form. You can use this tool to authenticate to any of the services in the keychain. Proactively support the user to fill in the form. Help them at every step.",
 				parameters: z.object({
-					service: z.union([z.enum(keychainServices as [string, ...string[]]), z.string()]).describe('The service to fill in credentials for. Can be novel or existing.'),
-					actions: z.array(z.object({
-						type: z.enum(['password', 'email', 'username', 'otp', 'token' ,'phone']),
-						coordinates: z.object({
-							x: z.number(),
-							y: z.number(),
-						}),
-					})),
+					serviceId: z
+						.union([
+							z.enum(keychainServices as [string, ...string[]]),
+							z.string(),
+						])
+						.describe(
+							"The service to fill in credentials for. Can be novel or existing."
+						),
+					elements: z
+						.array(
+							z.object({
+								type: z
+									.enum([
+										"password",
+										"email",
+										"username",
+										"token",
+										"phone",
+										"otp",
+									])
+									.describe("The type of element to be filled in"),
+								coordinates: z.object({
+									x: z.number().describe("The x coordinate of the element"),
+									y: z.number().describe("The y coordinate of the element"),
+								}),
+							})
+						)
+						.describe("The elements to be filled in"),
 				}),
-				execute: async ({ service, actions }) => {
-					if (!keychainServices.includes(service)) {
-						return {
-							type: 'request-keychain-credentials',
-							service,
-							actions,
-							message: 'The user is prompted to fill in the credentials for the service. Wait for them to fill in the credentials and confirm.'
-						};
-					}
-					await computer.system.keychain.authenticate({ service, authElements: actions });
-					return 'Filled input field';
+				execute: async ({ serviceId, elements }) => {
+					const success = await computer.apps.keychain.authenticate(
+						serviceId,
+						elements as AuthElement[]
+					);
+
+					return success
+						? "Form filled in successfully. You can now proceed to the next step."
+						: "Failed to fill in the form. Please try again.";
 				},
-			},
+			}),
 		},
 		maxSteps: 99,
 	});
