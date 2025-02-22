@@ -8,13 +8,14 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"setup": "tsx run scripts/init.ts"
+		"setup": "tsx scripts/init.ts"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^1.1.0",
 		"@cusedev/core": "latest",
 		"@radix-ui/react-accordion": "^1.2.2",
 		"@radix-ui/react-dropdown-menu": "^2.1.4",
+		"@radix-ui/react-label": "^2.1.2",
 		"@radix-ui/react-scroll-area": "^1.2.2",
 		"@radix-ui/react-slot": "^1.1.1",
 		"@radix-ui/react-toast": "^1.2.6",
@@ -33,12 +34,12 @@
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
-		"typescript": "^5.7.3",
+		"@cusedev/cli": "latest",
 		"@types/node": "^22.10.7",
 		"@types/react": "^19.0.7",
 		"@types/react-dom": "^19.0.3",
 		"postcss": "^8.5.1",
 		"tailwindcss": "^3.4.17",
-		"@cusedev/cli": "latest"
+		"typescript": "^5.7.3"
 	}
 }
