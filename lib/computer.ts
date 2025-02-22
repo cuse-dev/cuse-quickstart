@@ -39,9 +39,9 @@ export const setupComputer = async () => {
 	await computer.boot();
 
 	await computer.apps.keychain.setKey("google", {
-		password: "YzcA5NWd",
-		email: "cusedev42@gmail.com",
-		username: "cusedev42@gmail.com",
+		password: "your-google-password",
+		email: "your-google-email",
+		username: "your-google-username",
 	});
 
 	return computer;
