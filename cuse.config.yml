@@ -1,6 +1,6 @@
 version: 1.0.0
 project:
-  name: quickstart
+  name: cuse-quickstart
 computers:
-  - identifier: quickstart-computer
-    os: linux
+  - identifier: muddy-sea
+    os: browser

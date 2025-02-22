@@ -4,16 +4,20 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "next dev",
+		"dev": "next dev --port 3003",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"setup": "bun run scripts/init.ts"
 	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^1.1.0",
-		"@cusedev/core": "latest",
+		"@cusedev/core": "workspace:*",
+		"@radix-ui/react-accordion": "^1.2.2",
 		"@radix-ui/react-dropdown-menu": "^2.1.4",
+		"@radix-ui/react-scroll-area": "^1.2.2",
 		"@radix-ui/react-slot": "^1.1.1",
+		"@radix-ui/react-toast": "^1.2.6",
 		"ai": "^4.1.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
@@ -24,7 +28,8 @@
 		"react-dom": "^19.0.0",
 		"react-markdown": "^9.0.3",
 		"tailwind-merge": "^2.6.0",
-		"tailwindcss-animate": "^1.0.7"
+		"tailwindcss-animate": "^1.0.7",
+		"zod": "^3.24.1"
 	},
 	"devDependencies": {
 		"typescript": "^5.7.3",
@@ -33,7 +38,8 @@
 		"@types/react-dom": "^19.0.3",
 		"postcss": "^8.5.1",
 		"tailwindcss": "^3.4.17",
-		"eslint": "^9.18.0",
-		"@cusedev/cli": "latest"
+		"@cusedev/cli": "workspace:*",
+		"@repo/eslint-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*"
 	}
 }

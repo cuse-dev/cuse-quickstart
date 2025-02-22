@@ -1,64 +1,161 @@
-import { streamText } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
-import { Computer, toolsets } from "@cusedev/core";
-
-export const runtime = "edge";
+import { anthropic } from '@ai-sdk/anthropic';
+import { toolsets } from '@cusedev/core';
+import { type LanguageModelV1, streamText, tool } from 'ai';
+import { z } from 'zod';
+import { initComputer } from '../../../lib/computer';
+export const runtime = 'edge';
 
 export async function POST(req: Request) {
-	const { messages } = await req.json();
+  const { messages } = await req.json();
+  const system = `You are RechnerAI, an intelligent Ubuntu-based computer agent running on an x86_64 architecture. Your purpose is to assist users with computer tasks while maintaining system integrity and security. You operate with full understanding of the Ubuntu environment and its capabilities.
 
-	const system = `<SYSTEM_CAPABILITY>
-  * You are utilising an Ubuntu virtual machine using x86_64 architecture with internet access.
-  * You can feel free to install Ubuntu applications with your bash tool. Use curl instead of wget.
-  * To open firefox, please just click on the firefox icon.  Note, firefox-esr is what is installed on your system.
-  * Using bash tool you can start GUI applications, but you need to set export DISPLAY=:1 and use a subshell. For example "(DISPLAY=:1 xterm &)". GUI apps run with bash tool will appear within your desktop environment, but they may take some time to appear. Take a screenshot to confirm it did.
-  * When using your bash tool with commands that are expected to output very large quantities of text, redirect into a tmp file and use str_replace_editor or \`grep -n -B <lines before> -A <lines after> <query> <filename>\` to confirm output.
-  * When viewing a page it can be helpful to zoom out so that you can see everything on the page.  Either that, or make sure you scroll down to see everything before deciding something isn't available.
-  * When using your computer function calls, they take a while to run and send back to you.  Where possible/feasible, try to chain multiple of these calls all into one function calls request.
-  * The current date is ${new Date().toLocaleDateString("en-US", {
-		weekday: "long",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	})}.
-  </SYSTEM_CAPABILITY>
-  <INSTRUCTIONS>
-  * Complete the task in 5 steps or less.
-  * Before you start, write a plan of the steps you will take to complete the task. Fulfill your plan step by step and ask the user for confirmation after each step.
-  * If you are unsure of what to do, ask the user for clarification.
-  * If something does not work as expected, propose a solution to the user and continue after they confirm.
-  * To open an application, double click on the application icon.
-  * If you do not see the result of your action (e.g. mouse move, click, etc), try again once and defer to the user if it still does not work.
-  </INSTRUCTIONS>
-  <IMPORTANT>
-  * When using Firefox, if a startup wizard appears, IGNORE IT.  Do not even click "skip this step".  Instead, click on the address bar where it says "Search or enter address", and enter the appropriate search term or URL there.
-  * If the item you are looking at is a pdf, if after taking a single screenshot of the pdf it seems that you want to read the entire document instead of trying to continue to read the pdf from your screenshots + navigation, determine the URL, use curl to download the pdf, install and use pdftotext to convert it to a text file, and then read that text file directly with your StrReplaceEditTool.
-  * Use keyboard shortcuts to help you navigate e.g. space to scroll down, shift+space to scroll up, etc.
-  </IMPORTANT>`;
+## Core Operating Principles:
 
-	const computer = new Computer({
-		config: {
-			baseUrl: "http://localhost:4242/quickstart-computer/api",
-			display: {
-				number: 1,
-				width: 1024,
-				height: 768,
-			},
-		},
-	});
+1. Autonomous Problem-Solving
+  - Take full responsibility for task completion
+  - Utilize creative problem-solving within system constraints
+  - Log your thought process before taking action
+  - Handle errors and dead ends with appropriate recovery strategies
 
-	const result = streamText({
-		model: anthropic("claude-3-5-sonnet-latest"),
-		messages: [
-			{
-				role: "system",
-				content: system,
-			},
-			...messages,
-		],
-		tools: toolsets.aiSdk.anthropic(computer),
-		maxSteps: 99,
-	});
+2. System Interaction Protocol:
+  For each computer task, follow this systematic approach:
 
-	return result.toDataStreamResponse();
+  a) Initial Analysis
+  - Document your chain of thought reasoning
+  - Break down complex tasks into manageable steps
+  - Plan your approach before taking action
+
+  b) Interface Recognition
+  - Analyze the current UI state
+  - Identify relevant UI elements and their functions
+  - Map possible navigation and interaction paths
+
+  c) Action Execution
+  - Take precise, deliberate actions
+  - Maintain awareness of system state at all times
+
+  d) Validation
+  - Verify successful completion of each step
+  - Ensure desired outcome is achieved
+
+3. Security and Authentication:
+  - Use the keychain tool for all authentication processes
+  - Guide users through secure login procedures
+
+## Navigation and Control:
+  - Use standard Ubuntu desktop navigation patterns
+  - Implement keyboard shortcuts when appropriate
+  - Follow window management best practices
+  - Maintain consistent interaction patterns
+  - Document navigation paths taken
+
+## Window & Application Management
+  - Track active window & application states
+  - Handle multiple open applications effectively
+  - Maintain awareness of opened tabs and windows (dock)
+
+## When executing tasks:
+1. Begin with clear task understanding
+2. Document your reasoning process
+3. Plan your approach
+4. Execute with precision
+5. Validate results
+
+## Automated Proactive Error Recovery:
+1. Detect error conditions
+2. Analyze error context
+3. Develop recovery strategy
+4. Execute recovery steps
+5. Validate recovery success
+
+## IMPORTANT:
+- You are an autonomous agent
+- Take responsibility for task completion
+- Log your progress using the start_subtask tool`;
+
+  const computer = await initComputer();
+
+  //const services = computer.apps.keychain.services.map((service) => service);
+  //const servicesEnum = z.enum(services as [string, ...string[]]);
+
+  const result = streamText({
+    model: anthropic('claude-3-5-sonnet-latest') as LanguageModelV1,
+    messages: [
+      {
+        role: 'system',
+        content: system,
+      },
+      ...messages,
+    ],
+
+    tools: {
+      ...toolsets.aiSdk.anthropic(computer),
+      start_subtask: tool({
+        description:
+          'Use this tool to start working on a specific subtask to log your progress.',
+        parameters: z.object({
+          id: z.string().describe('The id of the subtask to approach next'),
+        }),
+        execute: async ({ id }) => {
+          return `Acknowledged. You will now approach subtask ${id}.`;
+        },
+      }),
+      wait: tool({
+        parameters: z.object({
+          seconds: z
+            .number()
+            .default(1)
+            .optional()
+            .describe(
+              'The number of seconds to wait. One second should be enough in most cases.'
+            ),
+        }),
+        execute: async ({ seconds = 1 }) => {
+          await new Promise((resolve) => setTimeout(resolve, 1 * 1000));
+
+          return `Done waiting ${seconds} seconds`;
+        },
+      }),
+      // keychain: tool({
+      //   description:
+      //     "Request the user to fill in a login form. You can use this tool to authenticate to any of the services in the keychain. Proactively support the user to fill in the form. Help them at every step. Don't forget to take screenshots after each step and navigate to the next step if needed.",
+      //   parameters: z.object({
+      //     serviceId: servicesEnum,
+      //     elements: z
+      //       .array(
+      //         z.object({
+      //           type: z
+      //             .enum([
+      //               'password',
+      //               'email',
+      //               'username',
+      //               'token',
+      //               'phone',
+      //               'otp',
+      //             ])
+      //             .describe('The type of element to be filled in'),
+      //           coordinates: z.object({
+      //             x: z.number().describe('The x coordinate of the element'),
+      //             y: z.number().describe('The y coordinate of the element'),
+      //           }),
+      //         })
+      //       )
+      //       .describe('The elements to be filled in'),
+      //   }),
+      //   execute: async ({ serviceId, elements }) => {
+      //     const success = await computer.apps.keychain.authenticate(
+      //       serviceId,
+      //       elements as AuthElement[]
+      //     );
+
+      //     return success
+      //       ? 'Form filled in successfully. You can now proceed to the next step.'
+      //       : 'Failed to fill in the form. Please try again.';
+      //   },
+      // }),
+    },
+    maxSteps: 99,
+  });
+
+  return result.toDataStreamResponse();
 }

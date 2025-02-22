@@ -31,11 +31,7 @@ const AIMessage: React.FC<AIMessageProps> = ({
           .map((toolInvocation) => (
             <ToolMessage
               key={toolInvocation.toolCallId}
-              content={
-                typeof toolInvocation.result == 'string'
-                  ? toolInvocation.result
-                  : 'Took screenshot'
-              }
+              toolCall={toolInvocation}
             />
           ))}
       </div>

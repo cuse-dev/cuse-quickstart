@@ -1,5 +1,5 @@
 export default function Preview() {
-  const url = (process.env.COMPUTER_URL ?? 'http://localhost:4242/quickstart-computer') + '/novnc';
+  const url = (process.env.COMPUTER_URL ?? 'http://localhost:8000') + '/api/display/stream';
   return (
     <div className="h-full flex flex-col items-center justify-center">
       <iframe
